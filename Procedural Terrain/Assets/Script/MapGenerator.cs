@@ -1,10 +1,18 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.Mesh;
 
 public class MapGenerator : MonoBehaviour
 {
+    //맵 평가를 위한 스크립트
+    public event Action OnNoiseMapUpdated; // 노이즈 맵 업데이트 이벤트
+
+    public mapEvaluation mapEvaluation;
+    //맵 생성을 위한 스크립트
+
 
     public enum DrawMode { NoiseMap, ColourMap,Mesh};
     public DrawMode drawMode;
@@ -28,11 +36,11 @@ public class MapGenerator : MonoBehaviour
     public AnimationCurve meshHeightCurve;
 
     public bool autoUpdate;
-
+    float[,] noiseMap;
     public TerrainType[] regions;
     public void GenerateMap()
     {
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, offset);
+        noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, offset);
 
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
         for (int y = 0; y < mapChunkSize; y++)
@@ -64,8 +72,17 @@ public class MapGenerator : MonoBehaviour
         }
         else if (drawMode == DrawMode.Mesh)
         {
-            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap,meshHeightMultiplier,meshHeightCurve,levelOfDetail), TextureGenerator.TextureFromCoulourMap(colourMap, mapChunkSize, mapChunkSize));
+            MeshData meshData = MeshGenerator.GenerateTerrainMesh(noiseMap, meshHeightMultiplier, meshHeightCurve, levelOfDetail);
+            display.DrawMesh(meshData, TextureGenerator.TextureFromCoulourMap(colourMap, mapChunkSize, mapChunkSize));
+
+            mapEvaluation.evaluation(noiseMap,regions);
+            OnNoiseMapUpdated.Invoke();
+
         }
+    }
+    public float[,] GetNoiseMap()
+    {
+        return noiseMap;
     }
     void OnValidate()
     {
