@@ -40,7 +40,13 @@ public class MapGenerator : MonoBehaviour
     public TerrainType[] regions;
     public void GenerateMap()
     {
+
+
+
+
         noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, offset);
+
+
 
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
         for (int y = 0; y < mapChunkSize; y++)
@@ -83,6 +89,10 @@ public class MapGenerator : MonoBehaviour
     public float[,] GetNoiseMap()
     {
         return noiseMap;
+    }
+    public float GetmeshHeightMultiplier()
+    {
+        return meshHeightMultiplier;
     }
     void OnValidate()
     {
