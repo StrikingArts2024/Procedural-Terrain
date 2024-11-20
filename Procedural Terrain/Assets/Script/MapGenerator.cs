@@ -7,6 +7,8 @@ using static UnityEngine.Mesh;
 
 public class MapGenerator : MonoBehaviour
 {
+    public bool gradient;
+
     //맵 평가를 위한 스크립트
     public event Action OnNoiseMapUpdated; // 노이즈 맵 업데이트 이벤트
 
@@ -23,6 +25,8 @@ public class MapGenerator : MonoBehaviour
 
 
     public float noiseScale;
+    [Range(0, 1)]
+    public float frequency;
     [Range(0, 10)]
     public int octaves;
     [Range(0,1)]
@@ -36,7 +40,7 @@ public class MapGenerator : MonoBehaviour
     public AnimationCurve meshHeightCurve;
 
     public bool autoUpdate;
-    float[,] noiseMap;
+    public float[,] noiseMap;
     public TerrainType[] regions;
     public void GenerateMap()
     {
@@ -44,7 +48,7 @@ public class MapGenerator : MonoBehaviour
 
 
 
-        noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, offset);
+        noiseMap = Noise.GenerateNoiseMap(gradient, mapChunkSize, mapChunkSize, seed, noiseScale, frequency, octaves, persistance, lacunarity, offset);
 
 
 
@@ -82,6 +86,11 @@ public class MapGenerator : MonoBehaviour
             display.DrawMesh(meshData, TextureGenerator.TextureFromCoulourMap(colourMap, mapChunkSize, mapChunkSize));
 
             mapEvaluation.evaluation(noiseMap,regions);
+
+            /*if (OnNoiseMapUpdated != null)
+            {
+                OnNoiseMapUpdated.Invoke();
+            }*/
             OnNoiseMapUpdated.Invoke();
 
         }
